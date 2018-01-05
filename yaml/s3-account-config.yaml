@@ -1,0 +1,13 @@
+--- 
+apiVersion: v1
+data: 
+  AWS_ACCESS_KEY_ID: testID
+  AWS_SECRET_ACCESS_KEY: testKey
+  S3_ENDPOINT: testEndpoint
+  S3_REGION: testRegion
+  S3_USE_HTTPS: test
+  S3_VERIFY_SSL: test
+kind: ConfigMap
+metadata: 
+  name: s3-account-config
+  namespace: default
