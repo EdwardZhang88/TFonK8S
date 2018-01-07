@@ -1,0 +1,77 @@
+apiVersion: "tensorflow.org/v1alpha1"
+kind: "TfJob"
+metadata:
+  name: "tf-cluster-mnist-gpu"
+spec:
+  replicaSpecs:
+    - replicas: 1
+      tfReplicaType: MASTER
+      tfPort: 3335
+      template:
+        spec:
+          containers:
+            - image: docker.mirrors.ustc.edu.cn/tensorflow/tensorflow:1.4.1-gpu
+              imagePullPolicy: Never
+              name: tensorflow
+              command: ["python"]
+              args: [/workdir/script/tensorflowHelloClusterMNIST3.py]
+              volumeMounts:
+              - name: workdir
+                mountPath: /workdir
+              - name: nvidia-libraries
+                mountPath: /usr/local/nvidia
+          volumes:
+          - name: workdir
+            hostPath:
+              path: /root/junzhang22/tensorflow_training
+          - name: nvidia-libraries
+            hostPath: 
+              path: /var/lib/nvidia-docker/volumes/nvidia_driver/387.26
+          restartPolicy: OnFailure
+          nodeSelector: 
+            kubernetes.io/hostname: test-86-081
+    - replicas: 1
+      tfReplicaType: WORKER
+      tfPort: 3333
+      template:
+        spec:
+          containers:
+            - image: docker.mirrors.ustc.edu.cn/tensorflow/tensorflow:1.4.1-gpu
+              imagePullPolicy: Never
+              name: tensorflow
+              resources: 
+                limits: 
+                  alpha.kubernetes.io/nvidia-gpu: 1
+              command: ["python"]
+              args: [/workdir/script/tensorflowHelloClusterMNIST3.py]
+              volumeMounts:
+              - name: workdir
+                mountPath: /workdir
+          volumes:
+          - name: workdir
+            hostPath:
+              path: /root/junzhang22/tensorflow_training
+          restartPolicy: OnFailure
+          nodeSelector:
+            kubernetes.io/hostname: test-86-081
+    - replicas: 1
+      tfReplicaType: PS
+      tfPort: 3334
+      template:
+        spec:
+          containers:
+            - image: tensorflow/tensorflow:1.4.0
+              imagePullPolicy: Never
+              name: tensorflow
+              command: ["python"]
+              args: [/workdir/script/tensorflowHelloClusterMNIST3.py]
+              volumeMounts:
+              - name: workdir
+                mountPath: /workdir
+          volumes:
+          - name: workdir
+            hostPath:
+              path: /root/junzhang22/tensorflow_training
+          restartPolicy: OnFailure
+          nodeSelector:
+            kubernetes.io/hostname: test-86-081
