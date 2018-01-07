@@ -1,0 +1,73 @@
+--- 
+apiVersion: tensorflow.org/v1alpha1
+kind: TfJob
+metadata: 
+  name: tensorflow-local-mnist-gpu
+spec: 
+  replicaSpecs: 
+    - 
+      replicas: 1
+      template: 
+        spec: 
+          containers: 
+            - 
+              args: 
+                - /workdir/script/tensorflowLocalMnistGPU.py
+              command: 
+                - python
+              env: 
+                - 
+                  name: AWS_ACCESS_KEY_ID
+                  valueFrom: 
+                    configMapKeyRef: 
+                      key: AWS_ACCESS_KEY_ID
+                      name: s3-account-config
+                - 
+                  name: AWS_SECRET_ACCESS_KEY
+                  valueFrom: 
+                    configMapKeyRef: 
+                      key: AWS_SECRET_ACCESS_KEY
+                      name: s3-account-config
+                - 
+                  name: S3_ENDPOINT
+                  valueFrom: 
+                    configMapKeyRef: 
+                      key: S3_ENDPOINT
+                      name: s3-account-config
+                - 
+                  name: S3_USE_HTTPS
+                  valueFrom: 
+                    configMapKeyRef: 
+                      key: S3_USE_HTTPS
+                      name: s3-account-config
+                - 
+                  name: S3_VERIFY_SSL
+                  valueFrom: 
+                    configMapKeyRef: 
+                      key: S3_VERIFY_SSL
+                      name: s3-account-config
+                - 
+                  name: S3_REGION
+                  valueFrom: 
+                    configMapKeyRef: 
+                      key: S3_REGION
+                      name: s3-account-config
+              image: "docker.mirrors.ustc.edu.cn/tensorflow/tensorflow:1.4.1-gpu"
+              imagePullPolicy: Never
+              name: tensorflow
+              resources: 
+                limits: 
+                  alpha.kubernetes.io/nvidia-gpu: 1
+              volumeMounts: 
+                - 
+                  mountPath: /workdir
+                  name: workdir
+          nodeSelector: 
+            kubernetes.io/hostname: test-86-081
+          restartPolicy: OnFailure
+          volumes: 
+            - 
+              hostPath: 
+                path: /root/junzhang22/tensorflow_training
+              name: workdir
+      tfReplicaType: MASTER
