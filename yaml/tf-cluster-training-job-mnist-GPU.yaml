@@ -1,77 +1,142 @@
-apiVersion: "tensorflow.org/v1alpha1"
-kind: "TfJob"
-metadata:
-  name: "tf-cluster-mnist-gpu"
-spec:
-  replicaSpecs:
-    - replicas: 1
-      tfReplicaType: MASTER
-      tfPort: 3335
-      template:
-        spec:
-          containers:
-            - image: docker.mirrors.ustc.edu.cn/tensorflow/tensorflow:1.4.1-gpu
+--- 
+apiVersion: tensorflow.org/v1alpha1
+kind: TfJob
+metadata: 
+  name: tf-cluster-mnist-gpu
+spec: 
+  replicaSpecs: 
+    - 
+      replicas: 1
+      template: 
+        spec: 
+          containers: 
+            - 
+              args: 
+                - /workdir/script/tensorflowClusterMnistGPU.py
+              command: 
+                - python
+              image: "docker.mirrors.ustc.edu.cn/tensorflow/tensorflow:1.5.0-rc0-gpu"
               imagePullPolicy: Never
               name: tensorflow
-              command: ["python"]
-              args: [/workdir/script/tensorflowHelloClusterMNIST3.py]
-              volumeMounts:
-              - name: workdir
-                mountPath: /workdir
-              - name: nvidia-libraries
-                mountPath: /usr/local/nvidia
-          volumes:
-          - name: workdir
-            hostPath:
-              path: /root/junzhang22/tensorflow_training
-          - name: nvidia-libraries
-            hostPath: 
-              path: /var/lib/nvidia-docker/volumes/nvidia_driver/387.26
-          restartPolicy: OnFailure
+              volumeMounts: 
+                - 
+                  mountPath: /workdir
+                  name: workdir
+                -
+                  mountPath: /usr/local/nvidia
+                  name: nvidia-libraries
           nodeSelector: 
             kubernetes.io/hostname: test-86-081
-    - replicas: 1
-      tfReplicaType: WORKER
-      tfPort: 3333
-      template:
-        spec:
-          containers:
-            - image: docker.mirrors.ustc.edu.cn/tensorflow/tensorflow:1.4.1-gpu
+          restartPolicy: OnFailure
+          volumes: 
+            - 
+              hostPath: 
+                path: /root/junzhang22/tensorflow_training
+              name: workdir
+            - 
+              hostPath: 
+                path: /var/lib/nvidia-docker/volumes/nvidia_driver/387.26
+              name: nvidia-libraries
+      tfPort: 3335
+      tfReplicaType: MASTER
+    - 
+      replicas: 1
+      template: 
+        spec: 
+          containers: 
+            - 
+              args: 
+                - /workdir/script/tensorflowClusterMnistGPU.py
+              command: 
+                - python
+              image: "docker.mirrors.ustc.edu.cn/tensorflow/tensorflow:1.5.0-rc0-gpu"
               imagePullPolicy: Never
               name: tensorflow
-              resources: 
-                limits: 
+              env: 
+                - 
+                  name: AWS_ACCESS_KEY_ID
+                  valueFrom: 
+                    configMapKeyRef: 
+                      key: AWS_ACCESS_KEY_ID
+                      name: s3-account-config
+                - 
+                  name: AWS_SECRET_ACCESS_KEY
+                  valueFrom: 
+                    configMapKeyRef: 
+                      key: AWS_SECRET_ACCESS_KEY
+                      name: s3-account-config
+                - 
+                  name: S3_ENDPOINT
+                  valueFrom: 
+                    configMapKeyRef: 
+                      key: S3_ENDPOINT
+                      name: s3-account-config
+                - 
+                  name: S3_USE_HTTPS
+                  valueFrom: 
+                    configMapKeyRef: 
+                      key: S3_USE_HTTPS
+                      name: s3-account-config
+                - 
+                  name: S3_VERIFY_SSL
+                  valueFrom: 
+                    configMapKeyRef: 
+                      key: S3_VERIFY_SSL
+                      name: s3-account-config
+                - 
+                  name: S3_REGION
+                  valueFrom: 
+                    configMapKeyRef: 
+                      key: S3_REGION
+                      name: s3-account-config
+              resources:
+                limits:
                   alpha.kubernetes.io/nvidia-gpu: 1
-              command: ["python"]
-              args: [/workdir/script/tensorflowHelloClusterMNIST3.py]
-              volumeMounts:
-              - name: workdir
-                mountPath: /workdir
-          volumes:
-          - name: workdir
-            hostPath:
-              path: /root/junzhang22/tensorflow_training
-          restartPolicy: OnFailure
-          nodeSelector:
+              volumeMounts: 
+                - 
+                  mountPath: /workdir
+                  name: workdir
+          nodeSelector: 
             kubernetes.io/hostname: test-86-081
-    - replicas: 1
-      tfReplicaType: PS
-      tfPort: 3334
-      template:
-        spec:
-          containers:
-            - image: tensorflow/tensorflow:1.4.0
+          restartPolicy: OnFailure
+          volumes: 
+            - 
+              hostPath: 
+                path: /root/junzhang22/tensorflow_training
+              name: workdir
+      tfPort: 3333
+      tfReplicaType: WORKER
+    - 
+      replicas: 1
+      template: 
+        spec: 
+          containers: 
+            - 
+              args: 
+                - /workdir/script/tensorflowClusterMnistGPU.py
+              command: 
+                - python
+              image: "docker.mirrors.ustc.edu.cn/tensorflow/tensorflow:1.5.0-rc0-gpu"
               imagePullPolicy: Never
               name: tensorflow
-              command: ["python"]
-              args: [/workdir/script/tensorflowHelloClusterMNIST3.py]
-              volumeMounts:
-              - name: workdir
-                mountPath: /workdir
-          volumes:
-          - name: workdir
-            hostPath:
-              path: /root/junzhang22/tensorflow_training
-          restartPolicy: OnFailure
-          nodeSelector:
+              volumeMounts: 
+                - 
+                  mountPath: /workdir
+                  name: workdir
+                -
+                  mountPath: /usr/local/nvidia
+                  name: nvidia-libraries
+          nodeSelector: 
             kubernetes.io/hostname: test-86-081
+          restartPolicy: OnFailure
+          volumes: 
+            - 
+              hostPath: 
+                path: /root/junzhang22/tensorflow_training
+              name: workdir
+            - 
+              hostPath: 
+                path: /var/lib/nvidia-docker/volumes/nvidia_driver/387.26
+              name: nvidia-libraries
+      tfPort: 3334
+      tfReplicaType: PS
